@@ -1,0 +1,20 @@
+---
+description: مدل محتوا و گردش‌کار CMS — فیلدهای ساختاریافته، RichContent، contract-first و صفحات مدیریتی
+alwaysApply: true
+---
+
+# قوانین CMS
+
+## مدل محتوا
+- مدل ترکیبی: فیلدهایی که سایت روی آن‌ها فیلتر، مرتب‌سازی، مقایسه، محاسبه یا نمایش در کارت انجام می‌دهد ساختاریافته‌اند (slug، نام‌ها، قاره، شهریه و هزینه با currency، رتبه، شهر، مقطع، رشته، مدت، شرایط زبان، حداقل معدل، intake، ددلاین، بورسیه و …). متن‌های توضیحی و متغیر در `sections` با نوع RichContent ذخیره می‌شوند.
+- RichContent همیشه JSON با whitelist نودها و markها و با zod اعتبارسنجی می‌شود. هیچ HTML خام ذخیره یا با dangerouslySetInnerHTML رندر نمی‌شود.
+- تصاویر فقط با fileId (آپلود از handler فایل)، نه URL خارجی.
+- مرجع تقسیم ساختاریافته در برابر آزاد: docs/content-model.md
+
+## روش کار
+- Contract-first: هر endpoint یا فیلد جدید ابتدا در src/contracts اضافه شود، سپس openapi بازتولید شود (npm run contract:generate)، سپس handler mock و seed، سپس UI.
+- هر صفحه مدیریتی باید داشته باشد: لیست، ایجاد، ویرایش، حذف، جستجو و فیلتر، حالت‌های loading/empty/error/403، کنترل دسترسی با <Can> و تست سناریوهای mock.
+- حذف موجودیتی که وابسته دارد → 409 CONFLICT با پیام فارسی و نمایش دیالوگ توضیحی در UI.
+- همه متن‌های رابط فارسی، RTL، و logical properties.
+- بعد از هر تغییر بزرگ: npm run lint، npm run build، npm run mock:smoke.
+- هر تغییر قرارداد → docs/api-conventions.md و docs/content-model.md به‌روز شوند.

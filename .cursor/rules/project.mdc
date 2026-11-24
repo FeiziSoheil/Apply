@@ -1,0 +1,25 @@
+---
+description: قوانین کلی پروژه موسسه اعزام دانشجو — استک، معماری و استانداردهای کدنویسی
+alwaysApply: true
+---
+
+# قوانین پروژه
+
+## درباره پروژه
+وب‌سایت عمومی یک موسسه اعزام دانشجو به خارج از کشور. فعلاً فقط فرانت‌اند؛ هیچ بک‌اندی وجود ندارد و همه داده‌ها mock هستند. اما معماری باید طوری باشد که بعداً بتوان به‌سادگی به API واقعی وصل شد.
+
+## استک
+Next.js (App Router, TypeScript strict)، Tailwind CSS، shadcn/ui (همه UI از کامپوننت‌های shadcn ساخته شود)، zod، react-hook-form، @hookform/resolvers، lucide-react، framer-motion، nuqs، date-fns-jalali.
+
+## قوانین کدنویسی
+- همه متن‌های رابط کاربری فارسی و جهت صفحه RTL است (`<html lang="fa" dir="rtl">`).
+- از Tailwind logical properties استفاده کن: ms-/me-/ps-/pe-/start-/end- به‌جای ml-/mr-/pl-/pr-/left-/right-.
+- ابتدا همه صفحات و کامپوننت‌ها Server Component باشند؛ فقط در صورت نیاز به state/event از 'use client' استفاده کن و آن را تا حد ممکن به پایین‌ترین کامپوننت ببر.
+- هیچ رنگ یا فاصله hardcode نکن؛ فقط از design tokenهای تعریف‌شده در globals.css و تنظیمات Tailwind استفاده کن.
+- هیچ نوع `any` مجاز نیست.
+- هر فرم: schema با zod در پوشه `src/lib/validations`، پیام خطا فارسی، و `useForm` با zodResolver.
+- دسترسی‌پذیری: label برای همه inputها، aria مناسب، focus state واضح، کنتراست کافی.
+- موبایل‌فرست طراحی کن، بعد برای tablet و desktop گسترش بده.
+- کامپوننت‌های تکراری را استخراج کن و از کپی‌پیست پرهیز کن.
+- بعد از هر تغییر بزرگ، `npm run lint` و `npm run build` باید بدون خطا اجرا شوند.
+- هیچ تصویر یا فونت از CDN خارجی لود نشود (کاربر ایرانی است و ممکن است دسترسی نداشته باشد). برای تصاویر placeholder از فایل‌های محلی یا SVG استفاده کن.
