@@ -10101,6 +10101,18 @@ components:
             - "null"
           format: uuid
           example: 3f2b8c4e-6a1d-4e0b-9c57-8d2f1a7b9e10
+        version:
+          type: integer
+          default: 1
+        assessment:
+          allOf:
+            - $ref: "#/components/schemas/AssessmentProfile"
+            - type:
+                - object
+                - "null"
+        onboardingCompleted:
+          type: boolean
+          default: false
         updatedAt:
           type: string
           format: date-time
@@ -10160,6 +10172,10 @@ components:
           example: 2026-10-18
         education:
           $ref: "#/components/schemas/StudentEducation"
+        onboardingCompleted:
+          type: boolean
+        version:
+          type: integer
     MobileChangeOtpResponse:
       type: object
       properties:
@@ -11644,14 +11660,20 @@ components:
             - "null"
           format: uuid
           example: 3f2b8c4e-6a1d-4e0b-9c57-8d2f1a7b9e10
+        countrySlug:
+          type:
+            - string
+            - "null"
+          minLength: 1
+          maxLength: 120
+          pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+          example: tu-munich
         addedAt:
           type: string
           format: date-time
           example: 2026-10-18T20:25:00.000Z
       required:
         - id
-        - programId
-        - universityId
         - addedAt
     Shortlist:
       type: object
@@ -11697,6 +11719,12 @@ components:
           type: string
           format: uuid
           example: 3f2b8c4e-6a1d-4e0b-9c57-8d2f1a7b9e10
+        countrySlug:
+          type: string
+          minLength: 1
+          maxLength: 120
+          pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+          example: tu-munich
     ShortlistDeleteResponse:
       type: object
       properties:
@@ -11727,6 +11755,10 @@ components:
           type:
             - string
             - "null"
+        countryName:
+          type:
+            - string
+            - "null"
         countrySlug:
           type:
             - string
@@ -11749,9 +11781,31 @@ components:
           type:
             - string
             - "null"
+        duration:
+          type:
+            - string
+            - "null"
         durationMonths:
           type:
             - integer
+            - "null"
+        deadline:
+          type:
+            - string
+            - "null"
+          format: date
+          example: 2026-10-18
+        languageRequirement:
+          type:
+            - string
+            - "null"
+        minGpa:
+          type:
+            - number
+            - "null"
+        hasScholarship:
+          type:
+            - boolean
             - "null"
       required:
         - programId
@@ -11762,7 +11816,6 @@ components:
         - degreeLevel
         - tuition
         - currency
-        - durationMonths
     ShortlistCompare:
       type: object
       properties:
@@ -11781,6 +11834,60 @@ components:
           $ref: "#/components/schemas/ResponseMeta"
       required:
         - data
+    ShortlistMergeResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/Shortlist"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+      required:
+        - data
+    ShortlistMerge:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShortlistPut"
+          maxItems: 50
+      required:
+        - items
+    ShortlistConsultResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            ticketId:
+              type:
+                - string
+                - "null"
+            message:
+              type: string
+          required:
+            - ticketId
+            - message
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+      required:
+        - data
+    ShortlistConsultationRequest:
+      type: object
+      properties:
+        programIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+            example: 3f2b8c4e-6a1d-4e0b-9c57-8d2f1a7b9e10
+          minItems: 1
+          maxItems: 10
+        note:
+          type: string
+          maxLength: 1000
+      required:
+        - programIds
     AnnouncementView:
       type: object
       properties:
@@ -12385,6 +12492,167 @@ components:
           $ref: "#/components/schemas/ResponseMeta"
       required:
         - data
+    PrivacyRequestType:
+      type: string
+      enum:
+        - data_export
+        - account_deletion
+    PrivacyRequestStatus:
+      type: string
+      enum:
+        - pending
+        - completed
+        - rejected
+    PrivacyRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 3f2b8c4e-6a1d-4e0b-9c57-8d2f1a7b9e10
+        userId:
+          type: string
+          format: uuid
+          example: 3f2b8c4e-6a1d-4e0b-9c57-8d2f1a7b9e10
+        userName:
+          type: string
+          minLength: 3
+          maxLength: 80
+        userMobile:
+          type: string
+          pattern: ^09\d{9}$
+          example: "09123456789"
+        type:
+          $ref: "#/components/schemas/PrivacyRequestType"
+        status:
+          $ref: "#/components/schemas/PrivacyRequestStatus"
+        reason:
+          type:
+            - string
+            - "null"
+          maxLength: 1000
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-10-18T20:25:00.000Z
+        processedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+          example: 2026-10-18T20:25:00.000Z
+        processedBy:
+          type:
+            - string
+            - "null"
+          maxLength: 120
+        adminNote:
+          type:
+            - string
+            - "null"
+          maxLength: 1000
+      required:
+        - id
+        - userId
+        - userName
+        - userMobile
+        - type
+        - status
+        - reason
+        - createdAt
+        - processedAt
+        - processedBy
+        - adminNote
+    MyPrivacyRequestsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PrivacyRequest"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+      required:
+        - data
+    PrivacyRequestResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/PrivacyRequest"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+      required:
+        - data
+    PrivacyRequestCreate:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/PrivacyRequestType"
+        reason:
+          type: string
+          maxLength: 1000
+      required:
+        - type
+    MyExportDataResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            exportedAt:
+              type: string
+            profile:
+              $ref: "#/components/schemas/StudentProfile"
+            data:
+              type: object
+              additionalProperties: {}
+          required:
+            - exportedAt
+            - profile
+            - data
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+      required:
+        - data
+    PrivacyRequestsPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PrivacyRequest"
+        meta:
+          type: object
+          properties:
+            pagination:
+              $ref: "#/components/schemas/Pagination"
+          required:
+            - pagination
+      required:
+        - data
+        - meta
+    PrivacyRequestProcessResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/PrivacyRequest"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+      required:
+        - data
+    PrivacyRequestProcess:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+            - approve
+            - reject
+        adminNote:
+          type: string
+          maxLength: 1000
+      required:
+        - decision
     Ticket:
       type: object
       properties:
@@ -13733,6 +14001,102 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserSessionsResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /me/sessions/{id}:
+    delete:
+      tags:
+        - Users
+      operationId: revokeMySession
+      summary: خروج از نشست مشخص
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: مدیر (admin)، مشاور (consultant)، دانشجو (student)"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - admin
+        - consultant
+        - student
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            example: 3f2b8c4e-6a1d-4e0b-9c57-8d2f1a7b9e10
+          required: true
+          name: id
+          in: path
+      responses:
+        "204":
+          description: نشست با موفقیت باطل شد
+        "400":
+          description: "`VALIDATION_ERROR` — داده‌های ورودی نامعتبر است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "`NOT_FOUND` — منبع پیدا نشد"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /me/sessions/revoke-others:
+    post:
+      tags:
+        - Users
+      operationId: revokeOtherSessions
+      summary: خروج از همه دستگاه‌های دیگر
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: مدیر (admin)، مشاور (consultant)، دانشجو (student)"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - admin
+        - consultant
+        - student
+      responses:
+        "204":
+          description: همه نشست‌های دیگر باطل شدند
         "401":
           description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
           content:
@@ -30843,6 +31207,118 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /me/shortlist/merge:
+    post:
+      tags:
+        - Student panel
+      operationId: mergeMyShortlist
+      summary: ادغام علاقه‌مندی‌های مهمان با حساب
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: دانشجو (student) — مجوز لازم: `student:write`"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - student
+      x-permission: student:write
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShortlistMerge"
+      responses:
+        "200":
+          description: ادغام شد
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortlistMergeResponse"
+        "400":
+          description: "`VALIDATION_ERROR` — داده‌های ورودی نامعتبر است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /me/shortlist/consult:
+    post:
+      tags:
+        - Student panel
+      operationId: requestShortlistConsultation
+      summary: درخواست مشاوره درباره برنامه‌های شورت‌لیست
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: دانشجو (student) — مجوز لازم: `student:write`"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - student
+      x-permission: student:write
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShortlistConsultationRequest"
+      responses:
+        "201":
+          description: درخواست مشاوره ثبت شد
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortlistConsultResponse"
+        "400":
+          description: "`VALIDATION_ERROR` — داده‌های ورودی نامعتبر است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /me/announcements:
     get:
       tags:
@@ -31977,6 +32453,318 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /me/privacy-requests:
+    get:
+      tags:
+        - Student panel
+      operationId: listMyPrivacyRequests
+      summary: درخواست‌های حریم خصوصی من
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: دانشجو (student) — مجوز لازم: `student:read`"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - student
+      x-permission: student:read
+      responses:
+        "200":
+          description: فهرست درخواست‌ها
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyPrivacyRequestsResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      tags:
+        - Student panel
+      operationId: createMyPrivacyRequest
+      summary: ثبت درخواست خروجی داده یا حذف حساب
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: دانشجو (student) — مجوز لازم: `student:write`"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - student
+      x-permission: student:write
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivacyRequestCreate"
+      responses:
+        "201":
+          description: درخواست ثبت شد
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacyRequestResponse"
+        "400":
+          description: "`VALIDATION_ERROR` — داده‌های ورودی نامعتبر است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /me/export-data:
+    get:
+      tags:
+        - Student panel
+      operationId: getMyExportData
+      summary: دریافت نسخه داده‌های من (JSON)
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: دانشجو (student) — مجوز لازم: `student:read`"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - student
+      x-permission: student:read
+      responses:
+        "200":
+          description: داده‌های کامل دانشجو
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyExportDataResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/privacy-requests:
+    get:
+      tags:
+        - Admin
+      operationId: listPrivacyRequests
+      summary: مدیریت درخواست‌های حریم خصوصی و داده‌ها
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: مدیر (admin) — مجوز لازم: `user:manage`"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - admin
+      x-permission: user:manage
+      parameters:
+        - schema:
+            type: integer
+            minimum: 1
+            default: 1
+          required: false
+          name: page
+          in: query
+        - schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          required: false
+          name: pageSize
+          in: query
+        - schema:
+            type: string
+            maxLength: 100
+            description: جست‌وجوی متنی
+          required: false
+          description: جست‌وجوی متنی
+          name: q
+          in: query
+        - schema:
+            type: string
+            enum:
+              - createdAt
+              - processedAt
+            description: نام فیلد مرتب‌سازی
+          required: false
+          description: نام فیلد مرتب‌سازی
+          name: sort
+          in: query
+        - schema:
+            $ref: "#/components/schemas/SortOrder"
+          required: false
+          name: order
+          in: query
+        - schema:
+            $ref: "#/components/schemas/PrivacyRequestType"
+          required: false
+          name: type
+          in: query
+        - schema:
+            $ref: "#/components/schemas/PrivacyRequestStatus"
+          required: false
+          name: status
+          in: query
+      responses:
+        "200":
+          description: فهرست درخواست‌ها
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacyRequestsPage"
+        "400":
+          description: "`VALIDATION_ERROR` — داده‌های ورودی نامعتبر است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`RATE_LIMITED` — تعداد درخواست‌ها بیش از حد مجاز است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "`INTERNAL` — خطای داخلی سرور"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/privacy-requests/{id}/process:
+    post:
+      tags:
+        - Admin
+      operationId: processPrivacyRequest
+      summary: بررسی و پردازش درخواست حریم خصوصی
+      description: "**دسترسی:** نیازمند ورود — نقش‌های مجاز: مدیر (admin) — مجوز لازم: `user:manage`"
+      security:
+        - sessionCookie: []
+      x-auth: true
+      x-roles:
+        - admin
+      x-permission: user:manage
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+            example: 3f2b8c4e-6a1d-4e0b-9c57-8d2f1a7b9e10
+          required: true
+          name: id
+          in: path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivacyRequestProcess"
+      responses:
+        "200":
+          description: درخواست پردازش شد
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacyRequestProcessResponse"
+        "400":
+          description: "`VALIDATION_ERROR` — داده‌های ورودی نامعتبر است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "`UNAUTHORIZED` — احراز هویت انجام نشده یا نشست (کوکی `session`) نامعتبر/منقضی است"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`FORBIDDEN` — دسترسی به این منبع برای نقش فعلی مجاز نیست"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "`NOT_FOUND` — منبع پیدا نشد"
           content:
             application/json:
               schema:
